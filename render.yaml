@@ -2,9 +2,7 @@ services:
   - name: redis-cache
     type: redis
     plan: free
-    redis_version: 6.2
-    ip_whitelist:
-      - 0.0.0.0/0  # Allow connections from any IP (use with caution)
-    env:
-      - name: REDIS_PASSWORD
-        value: adeosunsam  # Replace with your desired Redis password
+    region: oregon
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
