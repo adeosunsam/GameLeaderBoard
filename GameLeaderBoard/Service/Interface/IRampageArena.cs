@@ -1,7 +1,7 @@
-﻿using GameLeaderBoard.DTOs;
-using GameLeaderBoard.Utility;
+﻿using Infrastructure.Utility;
+using Infrastructure.DTOs;
 
-namespace GameLeaderBoard.Service.Interface
+namespace Infrastructure.Service.Interface
 {
     public interface IRampageArena
     {

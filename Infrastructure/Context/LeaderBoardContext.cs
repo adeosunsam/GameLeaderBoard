@@ -1,4 +1,4 @@
-﻿using GameLeaderBoard.Model;
+﻿using Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameLeaderBoard.Context
@@ -7,7 +7,8 @@ namespace GameLeaderBoard.Context
     {
         public LeaderBoardContext(DbContextOptions<LeaderBoardContext> option) : base(option) { }
 
-        public DbSet<LeaderBoard> LeaderBoards { get; set; }
+        public DbSet<RampageArenaLeaderBoard> RampageArenaLeaderBoards { get; set; }
+        public DbSet<MovieManiaLeaderBoard> MovieManiaLeaderBoards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

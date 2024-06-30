@@ -1,6 +1,6 @@
-using GameLeaderBoard.DTOs;
-using GameLeaderBoard.Service.Interface;
-using GameLeaderBoard.Utility;
+using Infrastructure.DTOs;
+using Infrastructure.Utility;
+using Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 

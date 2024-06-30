@@ -1,4 +1,4 @@
-﻿namespace GameLeaderBoard.DTOs
+﻿namespace Infrastructure.DTOs
 {
     public class GetScoreDto
     {

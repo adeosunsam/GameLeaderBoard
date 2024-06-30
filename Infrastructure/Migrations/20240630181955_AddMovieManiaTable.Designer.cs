@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GameLeaderBoard.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(LeaderBoardContext))]
-    [Migration("20231225000411_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20240630181955_AddMovieManiaTable")]
+    partial class AddMovieManiaTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,7 +24,45 @@ namespace GameLeaderBoard.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("GameLeaderBoard.Model.LeaderBoard", b =>
+            modelBuilder.Entity("Domain.Entity.MovieManiaLeaderBoard", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MovieId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlayerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlayerName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("PlayerScore")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MovieId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("MovieManiaLeaderBoards");
+                });
+
+            modelBuilder.Entity("Domain.Entity.RampageArenaLeaderBoard", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -53,7 +91,7 @@ namespace GameLeaderBoard.Migrations
                     b.HasIndex("PlayerName")
                         .IsUnique();
 
-                    b.ToTable("LeaderBoards");
+                    b.ToTable("RampageArenaLeaderBoards");
                 });
 #pragma warning restore 612, 618
         }

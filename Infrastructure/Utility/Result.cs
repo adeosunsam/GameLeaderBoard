@@ -1,6 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Text;
 
-namespace GameLeaderBoard.Utility
+namespace Infrastructure.Utility
 {
     public class Result<T>
     {
@@ -24,7 +27,7 @@ namespace GameLeaderBoard.Utility
         }
         public static Result<T> Success(string responseMessage, string responseCode = "200", T? data = default)
         {
-            return new Result<T> { ResponseMessage = responseMessage, Data = data, ResponseCode = responseCode};
+            return new Result<T> { ResponseMessage = responseMessage, Data = data, ResponseCode = responseCode };
         }
 
     }

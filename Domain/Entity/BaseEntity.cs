@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GameLeaderBoard.Model
+namespace Domain.Entity
 {
     public class BaseEntity
     {
