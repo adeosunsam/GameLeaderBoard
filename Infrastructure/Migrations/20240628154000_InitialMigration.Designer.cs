@@ -3,17 +3,19 @@ using System;
 using GameLeaderBoard.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GameLeaderBoard.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(LeaderBoardContext))]
-    partial class LeaderBoardContextModelSnapshot : ModelSnapshot
+    [Migration("20240628154000_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +24,7 @@ namespace GameLeaderBoard.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("GameLeaderBoard.Model.LeaderBoard", b =>
+            modelBuilder.Entity("Domain.Entity.LeaderBoard", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");

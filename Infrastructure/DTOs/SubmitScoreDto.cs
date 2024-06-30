@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GameLeaderBoard.DTOs
+namespace Infrastructure.DTOs
 {
     public class SubmitScoreDto
     {

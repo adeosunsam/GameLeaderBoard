@@ -1,6 +1,6 @@
-﻿namespace GameLeaderBoard.Model
+﻿namespace Domain.Entity
 {
-    public class LeaderBoard : BaseEntity
+    public class RampageArenaLeaderBoard : BaseEntity
     {
         public string PlayerName { get; set; }
 

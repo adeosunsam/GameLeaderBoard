@@ -1,16 +1,16 @@
-﻿using GameLeaderBoard.Context;
-using GameLeaderBoard.DTOs;
-using GameLeaderBoard.Model;
-using GameLeaderBoard.Service.Interface;
-using GameLeaderBoard.Utility;
+﻿using Domain.Entity;
+using GameLeaderBoard.Context;
+using Infrastructure.DTOs;
+using Infrastructure.Service.Interface;
+using Infrastructure.Utility;
 using Microsoft.EntityFrameworkCore;
 
-namespace GameLeaderBoard.Service.Implementation
+namespace Infrastructure.Service.Implementation
 {
     public class RampageArena : IRampageArena
     {
         private readonly LeaderBoardContext _context;
-        private readonly ILogger _logger;
+        private readonly ILogger<RampageArena> _logger;
 
         public RampageArena(LeaderBoardContext context, ILogger<RampageArena> logger)
         {
@@ -30,13 +30,13 @@ namespace GameLeaderBoard.Service.Implementation
             //submit score for new player
             if (request.PlayerId == null)
             {
-                var leaderboard = new LeaderBoard
+                var leaderboard = new RampageArenaLeaderBoard
                 {
                     PlayerName = request.PlayerName,
                     PlayerScore = request.Score
                 };
 
-                await _context.LeaderBoards.AddAsync(leaderboard);
+                await _context.RampageArenaLeaderBoards.AddAsync(leaderboard);
 
                 await _context.SaveChangesAsync();
                 playerId = leaderboard.Id;
@@ -45,7 +45,7 @@ namespace GameLeaderBoard.Service.Implementation
             //update existing player score
             if (request.PlayerName == null)
             {
-                var leaderboard = await _context.LeaderBoards.FirstOrDefaultAsync(x => x.Id == request.PlayerId);
+                var leaderboard = await _context.RampageArenaLeaderBoards.FirstOrDefaultAsync(x => x.Id == request.PlayerId);
                 if (leaderboard == null)
                 {
                     _logger.LogError("----------------LEADERBOARD NOT FOUND:Invalid player id provided----------------");
@@ -58,7 +58,7 @@ namespace GameLeaderBoard.Service.Implementation
 
             //update rank
             {
-                var leaderboards = await _context.LeaderBoards
+                var leaderboards = await _context.RampageArenaLeaderBoards
                     .OrderBy(x => x.CreatedOn)
                     .OrderByDescending(x => x.PlayerScore).ToListAsync();
 
@@ -82,7 +82,7 @@ namespace GameLeaderBoard.Service.Implementation
 
         public async Task<Result<List<GetScoreDto>>> GetScores(string? playerId = null)
         {
-            var leaderboards = await _context.LeaderBoards
+            var leaderboards = await _context.RampageArenaLeaderBoards
                     .OrderBy(x => x.CreatedOn)
                     .OrderByDescending(x => x.PlayerScore).Take(10).ToListAsync();
 
@@ -90,7 +90,7 @@ namespace GameLeaderBoard.Service.Implementation
             {
                 leaderboards.Remove(leaderboards[^1]);
 
-                var playerScore = await _context.LeaderBoards.FirstOrDefaultAsync(x => x.Id == playerId);
+                var playerScore = await _context.RampageArenaLeaderBoards.FirstOrDefaultAsync(x => x.Id == playerId);
 
                 if (playerScore == null)
                 {
