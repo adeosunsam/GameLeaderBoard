@@ -1,5 +1,6 @@
 ﻿using GameLeaderBoard.Context;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace GameLeaderBoard.Extension
 {
@@ -21,6 +22,8 @@ namespace GameLeaderBoard.Extension
 
         public static void AddDbContextAndConfigurations(this IServiceCollection services, IWebHostEnvironment env, IConfiguration config)
         {
+            string redisConnectionString;
+
             services.AddDbContextPool<LeaderBoardContext>(options =>
             {
                 string connStr = config["ConnectionStrings:DefaultConnection"];
@@ -35,6 +38,22 @@ namespace GameLeaderBoard.Extension
                 }*/
                 options.UseNpgsql(connStr);
             });
+
+            if (env.IsDevelopment())
+            {
+                 redisConnectionString = config["RedisSettings:ConnectionString"];
+            }
+            else
+            {
+                redisConnectionString = config["RedisSettings:ProdConnection"];
+            }
+
+            var options = ConfigurationOptions.Parse(redisConnectionString);
+            /*options.Ssl = true;
+            options.AbortOnConnectFail = false;*/
+
+            services.AddSingleton<IConnectionMultiplexer>(opt =>
+                    ConnectionMultiplexer.Connect(options));
         }
     }
 }

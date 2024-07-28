@@ -1,4 +1,5 @@
 ﻿using Domain.Entity;
+using Domain.Entity.MovieMania;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameLeaderBoard.Context
@@ -9,6 +10,11 @@ namespace GameLeaderBoard.Context
 
         public DbSet<RampageArenaLeaderBoard> RampageArenaLeaderBoards { get; set; }
         public DbSet<MovieManiaLeaderBoard> MovieManiaLeaderBoards { get; set; }
+        public DbSet<AppUser> AppUsers { get; set; }
+        public DbSet<UserFriend> UserFriends { get; set; }
+        public DbSet<Topic> Topics { get; set; }
+        public DbSet<FollowedTopic> FollowedTopics { get; set; }
+        public DbSet<UserGamingNumber> UserGamingNumbers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -1,10 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using MovieManiaSignalr;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Text;
 using static Infrastructure.DTOs.MovieManiaDtos;
 
 namespace GameLeaderBoard.Controllers
@@ -15,15 +10,12 @@ namespace GameLeaderBoard.Controllers
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<MovieController> _logger;
-        private readonly IConfiguration _configuration;
         private readonly MovieManiaService _movieService;
 
-        public MovieController(ILogger<MovieController> logger, HttpClient httpClient,
-            IConfiguration configuration, MovieManiaService maniaService)
+        public MovieController(ILogger<MovieController> logger, HttpClient httpClient, MovieManiaService maniaService)
         {
             _logger = logger;
             _httpClient = httpClient;
-            _configuration = configuration;
             _movieService = maniaService;
         }
 
@@ -52,34 +44,44 @@ namespace GameLeaderBoard.Controllers
             return Ok();
         }
 
-        [HttpPost]
-        [Route("~/api/login")]
-        public async Task<IActionResult> Login(string userId)
+        [HttpGet]
+        [Route("topics/{userId}")]
+        public async Task<IActionResult> FetchAvailableTopics(string userId)
         {
-            var token = GenerateJwtToken(userId);
-
-            return Ok(new { token });
+            var topics = await _movieService.FetchAvailableTopics(userId);
+            return Ok(topics);
         }
 
-        private string GenerateJwtToken(string userId)
+        [HttpGet]
+        [Route("game-count/{userId}")]
+        public async Task<IActionResult> FetchUserGamingCount(string userId)
         {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                // Add other claims as needed
-            };
+            var userGamingCount = await _movieService.FetchUserGamingCount(userId);
+            return Ok(userGamingCount);
+        }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        /*[HttpGet]
+        [Route("followed-topic/{userId}")]
+        public async Task<IActionResult> FetchUserFollowedTopic(string userId)
+        {
+            var followedTopic = await _movieService.FetchUserFollowedTopic(userId);
+            return Ok(followedTopic);
+        }*/
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JwtSettings:ValidIssuer"],
-                audience: _configuration["JwtSettings:ValidAudience"],
-                claims: claims,
-                expires: DateTime.Now.AddDays(30),
-                signingCredentials: creds);
+        [HttpPost]
+        [Route("create-user")]
+        public async Task<IActionResult> Login(UserDetailRequestDto request)
+        {
+            await _movieService.Login(request);
+            return Ok();
+        }
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+        [HttpPost]
+        [Route("~/api/login")]
+        public IActionResult Login(string userId)
+        {
+            var token = _movieService.Login(userId);
+            return Ok(new { token });
         }
     }
 }

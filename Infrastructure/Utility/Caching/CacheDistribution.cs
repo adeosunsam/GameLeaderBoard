@@ -1,4 +1,5 @@
 ﻿using StackExchange.Redis;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
 
@@ -15,11 +16,11 @@ namespace Infrastructure.Utility.Caching
 
         public IQueryable<T?>? GetDataByKey<T>(string key, Expression<Func<T, bool>>? expression = null)
         {
-            var completeSet = _redisDb.HashGetAll(key);
+            var completeSet = _redisDb.HashValues(key);
 
             if (completeSet != null && completeSet.Length > 0)
             {
-                var data = Array.ConvertAll(completeSet, val => JsonSerializer.Deserialize<T>(val.Value)).AsQueryable();
+                var data = Array.ConvertAll(completeSet, val => JsonSerializer.Deserialize<T>(val)).AsQueryable();
                 if (expression != null)
                 {
                     data = data.Where(expression);
@@ -29,7 +30,7 @@ namespace Infrastructure.Utility.Caching
             return default;
         }
 
-        public T? GetDataById<T>(string id, string key)
+        public T? GetDataById<T>(string key, string id)
         {
             var data = _redisDb.HashGet(key, id);
 
@@ -62,9 +63,20 @@ namespace Infrastructure.Utility.Caching
                 {new HashEntry(id, serialData)});
         }
 
-        public void DeleteData(string key, string id)
+        public void DeleteData(string key, string? id = null)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                var completeSet = _redisDb.HashGetAll(key);
+
+                if (completeSet != null)
+                {
+                    _redisDb.KeyDelete(key);
+                }
+                return;
+            }
             var getData = _redisDb.HashGet(key, id);
+
             if (!getData.IsNullOrEmpty)
             {
                 _redisDb.HashDelete(key, id);

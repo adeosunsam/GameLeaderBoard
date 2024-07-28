@@ -1,4 +1,4 @@
-﻿namespace Domain.Entity
+﻿namespace Domain.Entity.MovieMania
 {
     public class MovieManiaLeaderBoard : BaseEntity
     {

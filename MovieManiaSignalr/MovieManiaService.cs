@@ -1,19 +1,25 @@
-﻿using Domain.Entity;
+﻿using Domain.Entity.MovieMania;
 using GameLeaderBoard.Context;
 using Infrastructure.Utility.Caching;
+using Microsoft.Extensions.Configuration;
 using static Infrastructure.DTOs.MovieManiaDtos;
 
 namespace MovieManiaSignalr
 {
-    public class MovieManiaService
+    public partial class MovieManiaService
     {
         private readonly ICacheDistribution _cache;
         private readonly LeaderBoardContext _context;
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
 
-        public MovieManiaService(ICacheDistribution cache, LeaderBoardContext context)
+        public MovieManiaService(ICacheDistribution cache, LeaderBoardContext context, HttpClient httpClient,
+            IConfiguration configuration)
         {
             _cache = cache;
             _context = context;
+            _httpClient = httpClient;
+            _configuration = configuration;
         }
 
         //fetch all challenge for the current player

@@ -33,9 +33,6 @@ namespace GameLeaderBoard
             // Add services to the container.
             builder.Services.AddDbContextAndConfigurations(builder.Environment, configuration);
 
-            builder.Services.AddSingleton<IConnectionMultiplexer>(opt =>
-                    ConnectionMultiplexer.Connect(configuration["RedisSettings:ConnectionString"]));
-
             builder.Services.AddScoped<ICacheDistribution, CacheDistribution>();
             builder.Services.AddScoped<MovieManiaService>();
 
