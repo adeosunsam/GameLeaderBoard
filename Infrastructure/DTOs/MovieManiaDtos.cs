@@ -29,5 +29,44 @@
             /// </summary>
             public string GameId { get; set; }
         }
+
+        public class UserDetailResponseDto
+        {
+            public string Id { get; set; }
+            public string UserId { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string Email { get; set; }
+            public string UserName { get; set; }
+            public string Image { get; set; }//image in base64
+        }
+
+        public class UserGamingCountDto
+        {
+            public string Id { get; set; }
+            public int TotalGamePlayed { get; set; }
+        }
+
+        public class UserDetailRequestDto
+        {
+            public string UserId { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string Email { get; set; }
+            public string UserName { get; set; }
+            public string Image { get; set; }//image in base64
+        }
+
+        public class TopicResponseDto
+        {
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public string Category { get; set; }
+            public string Image { get; set; } // in base64
+            public int QuestionCount { get; set; }
+            public int FollowersCount { get; set; }
+            public bool IsFollowed { get; set; }
+        }
     }
 }

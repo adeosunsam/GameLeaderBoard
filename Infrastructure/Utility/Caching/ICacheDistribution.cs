@@ -8,6 +8,6 @@ namespace Infrastructure.Utility.Caching
         T? GetDataById<T>(string key, string id);
         void CreateData<T>(string key, string id, T data);
         void UpdateData<T>(string key, string id, T data);
-        void DeleteData(string key, string id);
+        void DeleteData(string key, string? id = null);
     }
 }

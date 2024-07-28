@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Domain.Entity;
+using Domain.Entity.MovieMania;
 
-namespace Infrastructure.EntityConfigurations
+namespace Infrastructure.EntityConfigurations.MovieMania
 {
     public class MovieManiaConfiguration : IEntityTypeConfiguration<MovieManiaLeaderBoard>
     {
