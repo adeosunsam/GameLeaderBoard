@@ -2,6 +2,7 @@
 using Infrastructure.Utility;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -74,7 +75,11 @@ namespace MovieManiaSignalr
         {
             try
             {
+                Console.WriteLine($"=========================> {JsonConvert.SerializeObject(request)}");
+
                 var user = _cache.GetDataById<AppUser>("users", request.UserId);
+
+                Console.WriteLine($"====>REDIS USER<=========== {JsonConvert.SerializeObject(user)}");
 
                 if (user != null)
                 {
@@ -105,6 +110,7 @@ namespace MovieManiaSignalr
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"====================={ex.Message}=====================");
                 return;
             }
             
