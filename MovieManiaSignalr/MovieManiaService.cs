@@ -8,15 +8,15 @@ namespace MovieManiaSignalr
 {
     public partial class MovieManiaService
     {
-        private readonly ICacheDistribution _cache;
+        //private readonly ICacheDistribution _cache;
         private readonly LeaderBoardContext _context;
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
 
-        public MovieManiaService(ICacheDistribution cache, LeaderBoardContext context, HttpClient httpClient,
+        public MovieManiaService(LeaderBoardContext context, HttpClient httpClient,
             IConfiguration configuration)
         {
-            _cache = cache;
+            //_cache = cache;
             _context = context;
             _httpClient = httpClient;
             _configuration = configuration;
@@ -27,24 +27,24 @@ namespace MovieManiaSignalr
         {
             var response = new List<UserChallengeData>();
 
-            var userChallengeDatas = _cache.GetDataByKey<UserChallengeData>("score", x => x.OpponentId == id);
+            /*var userChallengeDatas = _cache.GetDataByKey<UserChallengeData>("score", x => x.OpponentId == id);
 
             if (userChallengeDatas != null && userChallengeDatas.Any())
             {
                 response = userChallengeDatas.ToList();
-            }
+            }*/
             return response;
         }
 
         public void SaveScoreForOfflineOpponent(UserChallengeData request)
         {
-            _cache.UpdateData("score", request.GameId, request);
+            //_cache.UpdateData("score", request.GameId, request);
         }
 
         public async Task DeleteDataAfterCompetition(List<SaveScoreForLeaderBoardDto> request)
         {
             //remove record from cache
-            _cache.DeleteData("score", request.First().GameId);
+            //_cache.DeleteData("score", request.First().GameId);
 
             //save to db
             await _context.MovieManiaLeaderBoards.AddRangeAsync(request.Select(x => new MovieManiaLeaderBoard

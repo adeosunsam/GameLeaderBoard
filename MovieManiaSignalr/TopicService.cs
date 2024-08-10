@@ -8,14 +8,14 @@ namespace MovieManiaSignalr
     {
         public async Task<Result<ICollection<TopicResponseDto>>> FetchAvailableTopics(string userId)
         {
-            var topics = _cache.GetDataByKey<ICollection<TopicResponseDto>>("allTopic")?.SelectMany(x => x)?.ToList();
+            /*var topics = _cache.GetDataByKey<ICollection<TopicResponseDto>>("allTopic")?.SelectMany(x => x)?.ToList();
 
             if (topics != null)
             {
                 return Result<ICollection<TopicResponseDto>>.Success("Successfully retrieved all topics",data: topics);
-            }
+            }*/
 
-            topics = await (from t in _context.Topics
+            var topics = await (from t in _context.Topics
                             where !t.IsDeleted
                             join f in _context.FollowedTopics.Where(x => x.UserId == userId && !x.IsDeleted)
                             on t.Id equals f.TopicId into followedTopics
@@ -32,11 +32,11 @@ namespace MovieManiaSignalr
                                 IsFollowed = f != null
                             }).ToListAsync() ?? new List<TopicResponseDto>();
 
-            if (topics.Any())
+            /*if (topics.Any())
             {
                 _cache.CreateData("allTopic", string.Empty, topics);
             }
-
+*/
             return Result<ICollection<TopicResponseDto>>.Success("All topics retrieved successfully", data: topics);
         }
 

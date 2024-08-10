@@ -14,14 +14,14 @@ namespace MovieManiaSignalr
     {
         public async Task<Result<ICollection<UserDetailResponseDto>>> FetchUserFriends(string userId)
         {
-            var friends = _cache.GetDataById<ICollection<UserDetailResponseDto>>("friendList", userId);
+            /*var friends = _cache.GetDataById<ICollection<UserDetailResponseDto>>("friendList", userId);
 
             if (friends != null)
             {
                 return Result<ICollection<UserDetailResponseDto>>.Success("Successfully retrieved all friends in user list", data: friends);
-            }
+            }*/
 
-            friends = await (from f in _context.UserFriends
+            var friends = await (from f in _context.UserFriends
                              where f.AppUserId == userId
                              && !f.IsDeleted
                              join user in _context.AppUsers on f.FriendId equals user.Id
@@ -37,24 +37,24 @@ namespace MovieManiaSignalr
                                  UserName = user.UserName
                              }).ToListAsync() ?? new List<UserDetailResponseDto>();
 
-            if (friends.Any())
+            /*if (friends.Any())
             {
                 _cache.CreateData("friendList", userId, friends);
-            }
+            }*/
 
             return Result<ICollection<UserDetailResponseDto>>.Success("friends retrieved successfully", data: friends);
         }
 
         public async Task<Result<UserGamingCountDto>> FetchUserGamingCount(string userId)
         {
-            var gameCount = _cache.GetDataById<UserGamingCountDto>("gamingCount", userId);
+            /*var gameCount = _cache.GetDataById<UserGamingCountDto>("gamingCount", userId);
 
             if (gameCount != null)
             {
                 return Result<UserGamingCountDto>.Success("Successfully retrieved game count", data: gameCount);
-            }
+            }*/
 
-            gameCount = await (from f in _context.UserGamingNumbers
+            var gameCount = await (from f in _context.UserGamingNumbers
                              where f.AppUserId == userId
                              && !f.IsDeleted
                              select new UserGamingCountDto
@@ -63,10 +63,10 @@ namespace MovieManiaSignalr
                                  TotalGamePlayed = f.TotalGamePlayed
                              }).FirstOrDefaultAsync() ?? new UserGamingCountDto { Id = userId };
 
-            if (gameCount != null)
+            /*if (gameCount != null)
             {
                 _cache.CreateData("gamingCount", userId, gameCount);
-            }
+            }*/
 
             return Result<UserGamingCountDto>.Success("game count retrieved successfully", data: gameCount);
         }
@@ -75,36 +75,36 @@ namespace MovieManiaSignalr
         {
             try
             {
-                Console.WriteLine($"=========================> {JsonConvert.SerializeObject(request)}");
-
-                var user = _cache.GetDataById<AppUser>("users", request.UserId);
-
-                Console.WriteLine($"====>REDIS USER<=========== {JsonConvert.SerializeObject(user)}");
-
-                if (user != null)
-                {
-                    return;
-                }
+                var user = await _context.AppUsers.FirstOrDefaultAsync(x  => x.UserId == request.UserId);
 
                 var imageBytes = await _httpClient.GetByteArrayAsync(request.Image);
 
                 var image = Convert.ToBase64String(imageBytes);
 
-                var appUser = new AppUser
+                if (user != null)
                 {
-                    UserId = request.UserId,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Email = request.Email,
-                    Image = image,
-                    UserName = request.UserName
-                };
+                    user.FirstName = request.FirstName;
+                    user.LastName = request.LastName;
+                    user.Email = request.Email;
+                    user.Image = image;
+                    user.UserName = request.UserName;
+                }
+                else
+                {
+                    var appUser = new AppUser
+                    {
+                        UserId = request.UserId,
+                        FirstName = request.FirstName,
+                        LastName = request.LastName,
+                        Email = request.Email,
+                        Image = image,
+                        UserName = request.UserName
+                    };
 
-                _context.AppUsers.Add(appUser);
+                    _context.AppUsers.Add(appUser);
+                }
 
                 await _context.SaveChangesAsync();
-
-                _cache.CreateData("users", request.UserId, appUser);
 
                 return;
             }

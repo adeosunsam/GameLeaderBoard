@@ -39,7 +39,7 @@ namespace GameLeaderBoard.Extension
                 options.UseNpgsql(connStr);
             });
 
-            if (env.IsDevelopment())
+            /*if (env.IsDevelopment())
             {
                  redisConnectionString = config["RedisSettings:ConnectionString"];
             }
@@ -49,11 +49,11 @@ namespace GameLeaderBoard.Extension
             }
 
             var options = ConfigurationOptions.Parse(redisConnectionString);
-            /*options.Ssl = true;
-            options.AbortOnConnectFail = false;*/
+            *//*options.Ssl = true;
+            options.AbortOnConnectFail = false;*//*
 
             services.AddSingleton<IConnectionMultiplexer>(opt =>
-                    ConnectionMultiplexer.Connect(options));
+                    ConnectionMultiplexer.Connect(options));*/
         }
     }
 }
