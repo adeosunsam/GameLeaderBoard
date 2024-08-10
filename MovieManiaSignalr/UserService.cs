@@ -54,14 +54,20 @@ namespace MovieManiaSignalr
                 return Result<UserGamingCountDto>.Success("Successfully retrieved game count", data: gameCount);
             }*/
 
-            var gameCount = await (from f in _context.UserGamingNumbers
-                             where f.AppUserId == userId
-                             && !f.IsDeleted
-                             select new UserGamingCountDto
-                             {
-                                 Id = f.Id,
-                                 TotalGamePlayed = f.TotalGamePlayed
-                             }).FirstOrDefaultAsync() ?? new UserGamingCountDto { Id = userId };
+            var gameCount = await (from user in _context.AppUsers
+                                   where user.UserId == userId
+                                   && !user.IsDeleted
+                                   join f in _context.UserGamingNumbers.Where(x => !x.IsDeleted) on user.Id equals f.AppUserId into gameNumber
+                                   from f in gameNumber.DefaultIfEmpty()
+                                   join friend in _context.UserFriends on user.Id equals friend.AppUserId into friends
+                                   from friend in friends.DefaultIfEmpty()
+                                   group friend by new { user.UserId, TotalGamePlayed = (f == null ? 0 : f.TotalGamePlayed) } into grouped
+                                   select new UserGamingCountDto
+                                   {
+                                       Id = grouped.Key.UserId,
+                                       TotalGamePlayed = grouped.Key.TotalGamePlayed,
+                                       TotalFriends = grouped.Count(friend => friend != null)
+                                   }).FirstOrDefaultAsync() ?? new UserGamingCountDto { Id = userId };
 
             /*if (gameCount != null)
             {
