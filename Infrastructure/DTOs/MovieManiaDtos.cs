@@ -45,6 +45,7 @@
         {
             public string Id { get; set; }
             public int TotalGamePlayed { get; set; }
+            public int TotalFriends { get; set; }
         }
 
         public class UserDetailRequestDto
