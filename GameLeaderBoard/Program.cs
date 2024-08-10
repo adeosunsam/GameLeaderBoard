@@ -33,7 +33,7 @@ namespace GameLeaderBoard
             // Add services to the container.
             builder.Services.AddDbContextAndConfigurations(builder.Environment, configuration);
 
-            builder.Services.AddScoped<ICacheDistribution, CacheDistribution>();
+            //builder.Services.AddScoped<ICacheDistribution, CacheDistribution>();
             builder.Services.AddScoped<MovieManiaService>();
 
             builder.Services.AddAuthenticationConfig(configuration);
