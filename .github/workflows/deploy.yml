@@ -23,3 +23,4 @@ jobs:
           server: win8127.site4now.net
           username: odemwingie-001
           password: Odemwingie@6
+          target-delete: true
