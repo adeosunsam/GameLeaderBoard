@@ -1,10 +1,8 @@
 using GameLeaderBoard.Extension;
 using Infrastructure.Service.Implementation;
 using Infrastructure.Service.Interface;
-using Infrastructure.Utility.Caching;
 using Microsoft.AspNetCore.SignalR;
 using MovieManiaSignalr;
-using StackExchange.Redis;
 
 namespace GameLeaderBoard
 {
@@ -36,7 +34,7 @@ namespace GameLeaderBoard
             //builder.Services.AddScoped<ICacheDistribution, CacheDistribution>();
             builder.Services.AddScoped<MovieManiaService>();
 
-            builder.Services.AddAuthenticationConfig(configuration);
+            builder.Services.AddAuthenticationConfig(configuration, builder.Environment);
 
             builder.Services.AddHttpClient();
 
