@@ -1,0 +1,26 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build_and_deploy:
+    name: Build and deploy to SmarterASP.NET
+    runs-on: windows-latest
+    steps:
+      - name: build file
+        uses: actions/checkout@v4
+
+      - name: Deploy files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: win8127.site4now.net
+          username: odemwingie-001
+          password: Odemwingie@6
+          target-delete: true
