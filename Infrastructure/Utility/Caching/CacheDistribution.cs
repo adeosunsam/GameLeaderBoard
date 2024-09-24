@@ -1,13 +1,8 @@
-﻿using StackExchange.Redis;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text.Json;
-
-namespace Infrastructure.Utility.Caching
+﻿namespace Infrastructure.Utility.Caching
 {
     public class CacheDistribution : ICacheDistribution
     {
-        private IDatabase _redisDb { get; set; }
+        /*private IDatabase _redisDb { get; set; }
 
         public CacheDistribution(IConnectionMultiplexer redis)
         {
@@ -81,6 +76,6 @@ namespace Infrastructure.Utility.Caching
             {
                 _redisDb.HashDelete(key, id);
             }
-        }
+        }*/
     }
 }
