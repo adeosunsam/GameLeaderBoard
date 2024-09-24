@@ -20,6 +20,6 @@ jobs:
       - name: Deploy files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ftp://win8127.site4now.net:21
+          server: win8127.site4now.net:21
           username: odemwingie-001
           password: Odemwingie@6
