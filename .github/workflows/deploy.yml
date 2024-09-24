@@ -20,6 +20,6 @@ jobs:
       - name: Deploy files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.SERVER_FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          server: ftp://win8127.site4now.net:21
+          username: odemwingie-001
+          password: Odemwingie@6
