@@ -3,6 +3,8 @@ using Infrastructure.Service.Implementation;
 using Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.SignalR;
 using MovieManiaSignalr;
+using Serilog;
+using Serilog.Events;
 
 namespace GameLeaderBoard
 {
@@ -12,10 +14,23 @@ namespace GameLeaderBoard
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Host.ConfigureLogging(logging =>
+            /*builder.Host.ConfigureLogging(logging =>
             {
                 logging.ClearProviders();
                 logging.AddConsole();
+            });*/
+
+            builder.Host.UseSerilog((context, configuration) =>
+            {
+                configuration
+                    .MinimumLevel.Debug()
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                    .Enrich.FromLogContext()
+                    .WriteTo.File("Serilogs\\AppLogs_.log",
+                                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext} {ClassName} {MethodName} {Message} {NewLine} {Exception}",
+                                    rollingInterval: RollingInterval.Day,
+                                    rollOnFileSizeLimit: true,
+                                    fileSizeLimitBytes: 10000);
             });
 
             var configuration = builder.Configuration;
@@ -63,7 +78,10 @@ namespace GameLeaderBoard
 
             app.MapControllers();
 
+            app.Logger.LogInformation("Starting the app...");
             app.Run();
+
+            Log.CloseAndFlush();
         }
     }
 }

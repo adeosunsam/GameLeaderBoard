@@ -2,6 +2,7 @@
 using GameLeaderBoard.Context;
 using Infrastructure.Utility.Caching;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using static Infrastructure.DTOs.MovieManiaDtos;
 
 namespace MovieManiaSignalr
@@ -12,14 +13,16 @@ namespace MovieManiaSignalr
         private readonly LeaderBoardContext _context;
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<MovieManiaService> _logger;
 
         public MovieManiaService(LeaderBoardContext context, HttpClient httpClient,
-            IConfiguration configuration)
+            IConfiguration configuration, ILogger<MovieManiaService> logger)
         {
             //_cache = cache;
             _context = context;
             _httpClient = httpClient;
             _configuration = configuration;
+            _logger = logger;
         }
 
         //fetch all challenge for the current player

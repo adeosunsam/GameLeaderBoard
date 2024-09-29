@@ -1,8 +1,8 @@
 ﻿using Domain.Entity.MovieMania;
 using Infrastructure.Utility;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -22,20 +22,22 @@ namespace MovieManiaSignalr
             }*/
 
             var friends = await (from f in _context.UserFriends
-                             where f.AppUserId == userId
-                             && !f.IsDeleted
-                             join user in _context.AppUsers on f.FriendId equals user.Id
-                             where !f.IsDeleted
-                             select new UserDetailResponseDto
-                             {
-                                 Id = user.Id,
-                                 UserId = user.UserId,
-                                 FirstName = user.FirstName,
-                                 LastName = user.LastName,
-                                 Email = user.Email,
-                                 Image = user.Image,
-                                 UserName = user.UserName
-                             }).ToListAsync() ?? new List<UserDetailResponseDto>();
+                                 where f.AppUserId == userId
+                                 && !f.IsDeleted
+                                 join user in _context.AppUsers on f.FriendId equals user.Id
+                                 where !f.IsDeleted
+                                 select new UserDetailResponseDto
+                                 {
+                                     Id = user.Id,
+                                     UserId = user.UserId,
+                                     FirstName = user.FirstName,
+                                     LastName = user.LastName,
+                                     Email = user.Email,
+                                     Image = user.Image,
+                                     UserName = user.UserName
+                                 }).ToListAsync() ?? new List<UserDetailResponseDto>();
+
+            _logger.LogInformation($"Friends count is {friends.Count}");
 
             /*if (friends.Any())
             {
@@ -81,11 +83,19 @@ namespace MovieManiaSignalr
         {
             try
             {
-                var user = await _context.AppUsers.FirstOrDefaultAsync(x  => x.UserId == request.UserId);
+                var user = await _context.AppUsers.FirstOrDefaultAsync(x => x.UserId == request.UserId);
 
-                var imageBytes = await _httpClient.GetByteArrayAsync(request.Image);
+                string image = string.Empty;
+                try
+                {
+                    var imageBytes = await _httpClient.GetByteArrayAsync(request.Image);
 
-                var image = Convert.ToBase64String(imageBytes);
+                    image = Convert.ToBase64String(imageBytes);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"====================={ex.Message}=====================");
+                }
 
                 if (user != null)
                 {
@@ -111,16 +121,11 @@ namespace MovieManiaSignalr
                 }
 
                 await _context.SaveChangesAsync();
-
-                return;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"====================={ex.Message}=====================");
-                Console.WriteLine($"====================={ex.InnerException?.Message}=====================");
-                return;
+                _logger.LogError($"====================={ex.Message}=====================");
             }
-            
         }
 
         public string Login(string userId)

@@ -10,7 +10,7 @@ namespace GameLeaderBoard.Extension
 
         public static void AddAuthenticationConfig(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
         {
-            GetEnvironmentVariable(env, configuration);
+            //GetEnvironmentVariable(env, configuration);
 
             services.AddAuthentication(opt =>
             {
@@ -26,10 +26,12 @@ namespace GameLeaderBoard.Extension
                     ValidateIssuer = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidAudience = TokenData.Audience,
-                    ValidIssuer = TokenData.Issuer,
+                    //ValidAudience = TokenData.Audience,
+                    ValidAudience = configuration["JwtSettings:ValidAudience"],
+                    ValidIssuer = configuration["JwtSettings:ValidIssuer"],
+                    //ValidIssuer = TokenData.Issuer,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(TokenData.SecretKey)),
+                        Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"])),
                     ClockSkew = TimeSpan.Zero
                 };
             });
