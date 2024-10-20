@@ -5,20 +5,24 @@ namespace MovieManiaSignalr
 {
     public class ChatHub : Hub<IChatClient>
     {
-        //private static readonly Dictionary<string, HashSet<string>> GroupUsers = new();
+        private static readonly Dictionary<string, HashSet<string>> GroupUsers = new();
 
         public override Task OnConnectedAsync()
         {
             return base.OnConnectedAsync();
         }
 
-        public async Task SendMessageAsync(int playerScore, string userId)
+        public async Task SendMessageAsync(int playerScore, string groupName)
         {
             /*Console.WriteLine("To: " + routeOb.To.ToString());
             Console.WriteLine("Message Recieved on: " + Context.ConnectionId);*/
             try
             {
-                await Clients.User(userId: userId).RecieveScore(playerScore);
+                //await Clients.User(userId: userId).RecieveScore(playerScore);
+                var otherInGroup = GroupUsers[groupName].Where(x => x != Context.UserIdentifier);
+
+                await Clients.Users(otherInGroup).RecieveScore(playerScore);
+                //await Clients.OthersInGroup(groupName).RecieveScore(playerScore);
             }
             catch (Exception ex)
             {
@@ -47,9 +51,9 @@ namespace MovieManiaSignalr
         /*public async Task SendMessageToGroup(string groupName, int playerScore)
         {
             await Clients.Group(groupName).ReceiveMessage(playerScore);
-        }
+        }*/
 
-        public async Task JoinGroup(string groupName)
+        public async Task JoinGroupAsync(string groupName)
         {
             if (!GroupUsers.ContainsKey(groupName))
             {
@@ -58,39 +62,56 @@ namespace MovieManiaSignalr
 
             var usersInGroup = GroupUsers[groupName];
 
-            *//*if (usersInGroup.Count >= 2)
+            if (usersInGroup.Count >= 2)
             {
-                await Clients.Caller.SendAsync("Error", "Group is full.");
+                await Clients.Caller.ReceiveMessage("Group is full.");
                 return;
-            }*//*
-
-            if (usersInGroup.Add(Context.UserIdentifier))
-            {
-                await Groups.AddToGroupAsync(Context.UserIdentifier, groupName);
-                await Clients.Group(groupName).ReceiveMessage(0);
             }
+
+            usersInGroup.Add(Context.UserIdentifier);
+
+            await Groups.AddToGroupAsync(Context.UserIdentifier, groupName);
+
+            if(usersInGroup.Count > 1)
+                await Clients.Users(usersInGroup).ReceiveConnection();
+
+            /*if (usersInGroup.Add(Context.UserIdentifier))
+            {
+                try
+                {
+                    await Groups.AddToGroupAsync(Context.UserIdentifier, groupName);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            if (usersInGroup.Count > 1)
+            {
+            await Clients.Users(usersInGroup).ReceiveConnection();
+            }*/
         }
 
         public async Task LeaveGroup(string groupName)
         {
             if (GroupUsers.ContainsKey(groupName))
             {
-                GroupUsers[groupName].Remove(Context.ConnectionId);
+                GroupUsers[groupName].Remove(Context.UserIdentifier);
                 if (!GroupUsers[groupName].Any())
                 {
                     GroupUsers.Remove(groupName);
                 }
 
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-                await Clients.Group(groupName).ReceiveMessage(0);
+                await Groups.RemoveFromGroupAsync(Context.UserIdentifier, groupName);
+                await Clients.Group(groupName).ReceiveMessage("");
             }
         }
-*/
+
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            /*foreach (var group in GroupUsers.Keys.ToList())
+            foreach (var group in GroupUsers.Keys.ToList())
             {
-                if (GroupUsers[group].Remove(Context.ConnectionId))
+                if (GroupUsers[group].Remove(Context.UserIdentifier))
                 {
                     if (!GroupUsers[group].Any())
                     {
@@ -98,9 +119,9 @@ namespace MovieManiaSignalr
                     }
 
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, group);
-                    await Clients.Group(group).ReceiveMessage(0);
+                    await Clients.Group(group).ReceiveMessage("");
                 }
-            }*/
+            }
             await base.OnDisconnectedAsync(exception);
         }
     }
@@ -117,6 +138,6 @@ namespace MovieManiaSignalr
     {
         Task ReceiveMessage(string message);
         Task RecieveScore(int score);
-        Task ReceiveConnID(string? userEmail);
+        Task ReceiveConnection();
     }
 }

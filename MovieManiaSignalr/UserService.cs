@@ -97,7 +97,7 @@ namespace MovieManiaSignalr
                     _logger.LogError($"====================={ex.Message}=====================");
                 }
 
-                if (user != null)
+                /*if (user != null)
                 {
                     user.FirstName = request.FirstName;
                     user.LastName = request.LastName;
@@ -120,7 +120,7 @@ namespace MovieManiaSignalr
                     _context.AppUsers.Add(appUser);
                 }
 
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();*/
             }
             catch (Exception ex)
             {

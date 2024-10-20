@@ -60,6 +60,14 @@ namespace GameLeaderBoard.Controllers
             return Ok(userGamingCount);
         }
 
+        [HttpGet]
+        [Route("question/{topicId}")]
+        public async Task<IActionResult> FetchQuestionByTopic(string topicId)
+        {
+            var question = await _movieService.FetchQuestionByTopic(topicId);
+            return Ok(question);
+        }
+
         /*[HttpGet]
         [Route("followed-topic/{userId}")]
         public async Task<IActionResult> FetchUserFollowedTopic(string userId)

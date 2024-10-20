@@ -69,5 +69,20 @@
             public int FollowersCount { get; set; }
             public bool IsFollowed { get; set; }
         }
+
+        public class QuestionDto
+        {
+            public string Id { get; set; }
+            public string Title { get; set; }
+            public string? Image { get; set; }
+            public int IndexNumber { get; set; }
+            public List<QuestionOption> Options { get; set; }
+        }
+
+        public class QuestionOption
+        {
+            public string Title { get; set; }
+            public bool IsCorrectOption { get; set; }
+        }
     }
 }
