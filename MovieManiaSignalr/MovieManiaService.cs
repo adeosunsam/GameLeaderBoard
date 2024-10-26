@@ -1,6 +1,7 @@
 ﻿using Domain.Entity.MovieMania;
 using GameLeaderBoard.Context;
-using Infrastructure.Utility.Caching;
+using Infrastructure.Utility;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using static Infrastructure.DTOs.MovieManiaDtos;
@@ -25,8 +26,29 @@ namespace MovieManiaSignalr
             _logger = logger;
         }
 
+        public async Task<Result<ICollection<UserActivityResponse>>> FetchUserActivity(string userId)
+        {
+            var userActivity = await (from activity in _context.UserActivities
+                                      where activity.UserId == userId
+                                      && !activity.IsDeleted
+                                      join user in _context.AppUsers on activity.ChallengerId equals user.UserId
+                                      where !user.IsDeleted
+                                      join topic in _context.Topics on activity.TopicId equals topic.Id into t
+                                      from topic in t.DefaultIfEmpty()
+                                      select new UserActivityResponse
+                                      {
+                                          ChallengerName = $"{user.LastName} {user.FirstName}",
+                                          UserImage = user.Image,
+                                          Activity = activity.ActivityAction,
+                                          TopicName = topic.Name,
+                                          GroupId = activity.GroupId
+                                      }).ToListAsync() ?? new List<UserActivityResponse>();
+
+            return Result<ICollection<UserActivityResponse>>.Success("All user activities retrieved successfully", data: userActivity);
+        }
+
         //fetch all challenge for the current player
-        public ICollection<UserChallengeData> FetchChallengedData(string id)// current playerId
+        public ICollection<UserChallengeData> FetchChallengedData(string userId)
         {
             var response = new List<UserChallengeData>();
 

@@ -14,17 +14,10 @@ namespace MovieManiaSignalr
     {
         public async Task<Result<ICollection<UserDetailResponseDto>>> FetchUserFriends(string userId)
         {
-            /*var friends = _cache.GetDataById<ICollection<UserDetailResponseDto>>("friendList", userId);
-
-            if (friends != null)
-            {
-                return Result<ICollection<UserDetailResponseDto>>.Success("Successfully retrieved all friends in user list", data: friends);
-            }*/
-
             var friends = await (from f in _context.UserFriends
                                  where f.AppUserId == userId
                                  && !f.IsDeleted
-                                 join user in _context.AppUsers on f.FriendId equals user.Id
+                                 join user in _context.AppUsers on f.FriendId equals user.UserId
                                  where !f.IsDeleted
                                  select new UserDetailResponseDto
                                  {
@@ -37,12 +30,18 @@ namespace MovieManiaSignalr
                                      UserName = user.UserName
                                  }).ToListAsync() ?? new List<UserDetailResponseDto>();
 
-            _logger.LogInformation($"Friends count is {friends.Count}");
+            friends = new List<UserDetailResponseDto> { new UserDetailResponseDto
+                                 {
+                                     Id = Guid.NewGuid().ToString(),
+                                     UserId = Guid.NewGuid().ToString(),
+                                     FirstName = "Samuel",
+                                     LastName = "Adeosun",
+                                     Email = "test@gmail.com",
+                                     Image = "",
+                                     UserName = "Swagger"
+                                 }};
 
-            /*if (friends.Any())
-            {
-                _cache.CreateData("friendList", userId, friends);
-            }*/
+            _logger.LogInformation($"Friends count is {friends.Count}");
 
             return Result<ICollection<UserDetailResponseDto>>.Success("friends retrieved successfully", data: friends);
         }
@@ -97,7 +96,7 @@ namespace MovieManiaSignalr
                     _logger.LogError($"====================={ex.Message}=====================");
                 }
 
-                /*if (user != null)
+                if (user != null)
                 {
                     user.FirstName = request.FirstName;
                     user.LastName = request.LastName;
@@ -120,7 +119,7 @@ namespace MovieManiaSignalr
                     _context.AppUsers.Add(appUser);
                 }
 
-                await _context.SaveChangesAsync();*/
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {

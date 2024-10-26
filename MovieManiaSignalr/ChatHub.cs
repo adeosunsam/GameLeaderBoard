@@ -1,11 +1,20 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Domain.Entity.MovieMania;
+using GameLeaderBoard.Context;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace MovieManiaSignalr
 {
     public class ChatHub : Hub<IChatClient>
     {
+        public ChatHub(LeaderBoardContext context)
+        {
+            _context = context;
+        }
+
         private static readonly Dictionary<string, HashSet<string>> GroupUsers = new();
+        private readonly LeaderBoardContext _context;
 
         public override Task OnConnectedAsync()
         {
@@ -14,8 +23,6 @@ namespace MovieManiaSignalr
 
         public async Task SendMessageAsync(int playerScore, string groupName)
         {
-            /*Console.WriteLine("To: " + routeOb.To.ToString());
-            Console.WriteLine("Message Recieved on: " + Context.ConnectionId);*/
             try
             {
                 //await Clients.User(userId: userId).RecieveScore(playerScore);
@@ -28,24 +35,6 @@ namespace MovieManiaSignalr
             {
                 Console.WriteLine(ex.Message);
             }
-            
-            /*if (routeOb.To.ToString() == string.Empty)
-            {
-                Console.WriteLine("Broadcast");
-                var test = new string[1];
-                test[0] = Context.ConnectionId;
-                await Clients.Caller.ReceiveMessage(message);
-                await Clients.AllExcept(test).ReceiveMessage(message);
-            }
-            else
-            {
-                string toClient = routeOb.To;
-                Console.WriteLine("Targeted on: " + toClient);
-
-                await Clients.Caller.ReceiveMessage(message);
-                //await Clients.User(userId: Context.ConnectionId).ReceiveMessage(message);
-                await Clients.Client(recieverEmail).ReceiveMessage(playerScore);
-            }*/
         }
 
         /*public async Task SendMessageToGroup(string groupName, int playerScore)
@@ -53,14 +42,56 @@ namespace MovieManiaSignalr
             await Clients.Group(groupName).ReceiveMessage(playerScore);
         }*/
 
-        public async Task JoinGroupAsync(string groupName)
+        public async Task CreateGroupAsync(string opponentId, string topicId)
         {
+            var groupName = Guid.NewGuid().ToString();
+
             if (!GroupUsers.ContainsKey(groupName))
             {
                 GroupUsers[groupName] = new HashSet<string>();
             }
 
             var usersInGroup = GroupUsers[groupName];
+
+            usersInGroup.Add(Context.UserIdentifier);
+
+            try
+            {
+                await _context.UserActivities.AddAsync(new UserActivity
+                {
+                    ChallengerId = Context.UserIdentifier,
+                    UserId = opponentId,
+                    TopicId = topicId,
+                    ActivityAction = ActivityEnum.Challenge,
+                    GroupId = groupName
+                });
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.ReceiveMessage(ex.Message);
+            }
+
+            await Clients.Caller.ReceiveMessage("Group created successfully.");
+
+            //await Clients.User(opponentId).RecieveNotification();
+            await Clients.User(opponentId).RecieveNotification();
+        }
+
+        public async Task JoinGroupAsync(string activityId)
+        {
+            var activity = await (from a in _context.UserActivities
+                                  where a.Id == activityId
+                                  && a.ActivityAction == ActivityEnum.Challenge
+                                  && !string.IsNullOrEmpty(a.GroupId)
+                                  && !a.IsDeleted
+                                  select a).FirstOrDefaultAsync();
+            if (activity == null)
+            {
+                await Clients.All.ReceiveMessage("Unable to join at the moment.");
+                return;
+            }
+            var usersInGroup = GroupUsers[activity.GroupId];
 
             if (usersInGroup.Count >= 2)
             {
@@ -70,10 +101,10 @@ namespace MovieManiaSignalr
 
             usersInGroup.Add(Context.UserIdentifier);
 
-            await Groups.AddToGroupAsync(Context.UserIdentifier, groupName);
+            //await Groups.AddToGroupAsync(Context.UserIdentifier, groupName);
 
-            if(usersInGroup.Count > 1)
-                await Clients.Users(usersInGroup).ReceiveConnection();
+            //if (usersInGroup.Count > 1)
+            await Clients.Users(usersInGroup).ReceiveConnection();
 
             /*if (usersInGroup.Add(Context.UserIdentifier))
             {
@@ -139,5 +170,6 @@ namespace MovieManiaSignalr
         Task ReceiveMessage(string message);
         Task RecieveScore(int score);
         Task ReceiveConnection();
+        Task RecieveNotification();
     }
 }

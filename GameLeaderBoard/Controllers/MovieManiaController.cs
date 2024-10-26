@@ -28,6 +28,14 @@ namespace GameLeaderBoard.Controllers
             return Ok(challenges);
         }
 
+        [HttpGet]
+        [Route("activity/{userId}")]
+        public async Task<IActionResult> FetchUserActivity(string userId)
+        {
+            var activities = await _movieService.FetchUserActivity(userId);
+            return Ok(activities);
+        }
+
         [HttpPost]
         [Route("save-challenge")]
         public IActionResult SaveChallengedData([FromBody] UserChallengeData request)
@@ -58,6 +66,14 @@ namespace GameLeaderBoard.Controllers
         {
             var userGamingCount = await _movieService.FetchUserGamingCount(userId);
             return Ok(userGamingCount);
+        }
+
+        [HttpGet]
+        [Route("friends/{userId}")]
+        public async Task<IActionResult> FetchUserFriends(string userId)
+        {
+            var userFriends = await _movieService.FetchUserFriends(userId);
+            return Ok(userFriends);
         }
 
         [HttpGet]

@@ -17,6 +17,7 @@ namespace GameLeaderBoard.Context
         public DbSet<UserGamingNumber> UserGamingNumbers { get; set; }
         public DbSet<QuestionOption> QuestionOptions { get; set; }
         public DbSet<Question> Questions { get; set; }
+        public DbSet<UserActivity> UserActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

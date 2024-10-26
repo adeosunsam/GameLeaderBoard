@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.DTOs
+﻿using Domain.Entity.MovieMania;
+
+namespace Infrastructure.DTOs
 {
     public static class MovieManiaDtos
     {
@@ -15,6 +17,15 @@
             /// player score
             /// </summary>
             public int Score { get; set; }
+        }
+
+        public class UserActivityResponse
+        {
+            public string ChallengerName { get; set; }
+            public string? UserImage { get; set; }
+            public ActivityEnum Activity { get; set; }
+            public string? TopicName { get; set; }
+            public string? GroupId { get; set; }
         }
 
         public class SaveScoreForLeaderBoardDto
