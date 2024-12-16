@@ -37,6 +37,8 @@ namespace MovieManiaSignalr
                                       from topic in t.DefaultIfEmpty()
                                       select new UserActivityResponse
                                       {
+                                          Id = activity.Id,
+                                          TopicId = topic.Id,
                                           ChallengerName = $"{user.LastName} {user.FirstName}",
                                           UserImage = user.Image,
                                           Activity = activity.ActivityAction,

@@ -19,6 +19,12 @@ namespace GameLeaderBoard.Controllers
             _movieService = maniaService;
         }
 
+        [HttpPost("tazama-webbhook")]
+        public IActionResult GenerateMessagePair([FromBody]string messageObject)
+        {
+            return Ok(messageObject);
+        }
+
         [HttpGet]
         [Route("pending-challenge")]
         public IActionResult FetchChallengedData(string playerId)

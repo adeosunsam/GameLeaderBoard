@@ -42,16 +42,14 @@ namespace MovieManiaSignalr
             await Clients.Group(groupName).ReceiveMessage(playerScore);
         }*/
 
-        public async Task CreateGroupAsync(string opponentId, string topicId)
+        public async Task CreateGroupAsync(string opponentId, string topicId, string groupId)
         {
-            var groupName = Guid.NewGuid().ToString();
-
-            if (!GroupUsers.ContainsKey(groupName))
+            if (!GroupUsers.ContainsKey(groupId))
             {
-                GroupUsers[groupName] = new HashSet<string>();
+                GroupUsers[groupId] = new HashSet<string>();
             }
 
-            var usersInGroup = GroupUsers[groupName];
+            var usersInGroup = GroupUsers[groupId];
 
             usersInGroup.Add(Context.UserIdentifier);
 
@@ -63,7 +61,7 @@ namespace MovieManiaSignalr
                     UserId = opponentId,
                     TopicId = topicId,
                     ActivityAction = ActivityEnum.Challenge,
-                    GroupId = groupName
+                    GroupId = groupId
                 });
                 await _context.SaveChangesAsync();
             }
@@ -105,6 +103,10 @@ namespace MovieManiaSignalr
 
             //if (usersInGroup.Count > 1)
             await Clients.Users(usersInGroup).ReceiveConnection();
+
+            activity.IsDeleted = true;
+
+            await _context.SaveChangesAsync();
 
             /*if (usersInGroup.Add(Context.UserIdentifier))
             {

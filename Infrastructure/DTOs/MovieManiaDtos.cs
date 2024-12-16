@@ -21,10 +21,12 @@ namespace Infrastructure.DTOs
 
         public class UserActivityResponse
         {
+            public string Id { get; set; }
             public string ChallengerName { get; set; }
             public string? UserImage { get; set; }
             public ActivityEnum Activity { get; set; }
             public string? TopicName { get; set; }
+            public string? TopicId { get; set; }
             public string? GroupId { get; set; }
         }
 
@@ -94,6 +96,148 @@ namespace Infrastructure.DTOs
         {
             public string Title { get; set; }
             public bool IsCorrectOption { get; set; }
+        }
+
+        public class RelayServiceCallback
+        {
+            public Transaction transaction { get; set; }
+            public Networkmap networkMap { get; set; }
+            public Report report { get; set; }
+
+            public class Transaction
+            {
+                public string TxTp { get; set; }
+                public Fitofipmtsts FIToFIPmtSts { get; set; }
+            }
+
+            public class Fitofipmtsts
+            {
+                public Grphdr GrpHdr { get; set; }
+                public Txinfandsts TxInfAndSts { get; set; }
+            }
+
+            public class Grphdr
+            {
+                public string MsgId { get; set; }
+                public DateTime CreDtTm { get; set; }
+            }
+
+            public class Txinfandsts
+            {
+                public string OrgnlInstrId { get; set; }
+                public string OrgnlEndToEndId { get; set; }
+                public string TxSts { get; set; }
+                public DateTime AccptncDtTm { get; set; }
+                public Instgagt InstgAgt { get; set; }
+                public Instdagt InstdAgt { get; set; }
+            }
+
+            public class Instgagt
+            {
+                public Fininstnid FinInstnId { get; set; }
+            }
+
+            public class Fininstnid
+            {
+                public Clrsysmmbid ClrSysMmbId { get; set; }
+            }
+
+            public class Clrsysmmbid
+            {
+                public string MmbId { get; set; }
+            }
+
+            public class Instdagt
+            {
+                public Fininstnid1 FinInstnId { get; set; }
+            }
+
+            public class Fininstnid1
+            {
+                public Clrsysmmbid1 ClrSysMmbId { get; set; }
+            }
+
+            public class Clrsysmmbid1
+            {
+                public string MmbId { get; set; }
+            }
+
+            public class Networkmap
+            {
+                public bool active { get; set; }
+                public string cfg { get; set; }
+                public Message[] messages { get; set; }
+            }
+
+            public class Message
+            {
+                public string id { get; set; }
+                public string cfg { get; set; }
+                public string txTp { get; set; }
+                public Typology[] typologies { get; set; }
+            }
+
+            public class Typology
+            {
+                public string id { get; set; }
+                public string cfg { get; set; }
+                public Rule[] rules { get; set; }
+            }
+
+            public class Rule
+            {
+                public string id { get; set; }
+                public string cfg { get; set; }
+            }
+
+            public class Report
+            {
+                public string evaluationID { get; set; }
+                public Metadata metaData { get; set; }
+                public string status { get; set; }
+                public DateTime timestamp { get; set; }
+                public Tadpresult tadpResult { get; set; }
+            }
+
+            public class Metadata
+            {
+                public int prcgTmDP { get; set; }
+                public int prcgTmED { get; set; }
+            }
+
+            public class Tadpresult
+            {
+                public string id { get; set; }
+                public string cfg { get; set; }
+                public Typologyresult[] typologyResult { get; set; }
+                public int prcgTm { get; set; }
+            }
+
+            public class Typologyresult
+            {
+                public string id { get; set; }
+                public string cfg { get; set; }
+                public int result { get; set; }
+                public Ruleresult[] ruleResults { get; set; }
+                public int prcgTm { get; set; }
+                public bool review { get; set; }
+                public Workflow workflow { get; set; }
+            }
+
+            public class Workflow
+            {
+                public int alertThreshold { get; set; }
+                public int interdictionThreshold { get; set; }
+            }
+
+            public class Ruleresult
+            {
+                public string id { get; set; }
+                public string cfg { get; set; }
+                public string subRuleRef { get; set; }
+                public int prcgTm { get; set; }
+                public int wght { get; set; }
+            }
         }
     }
 }
