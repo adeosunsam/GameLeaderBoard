@@ -21,12 +21,12 @@ namespace MovieManiaSignalr
             return base.OnConnectedAsync();
         }
 
-        public async Task SendMessageAsync(int playerScore, string groupName)
+        public async Task SendMessageAsync(int playerScore, string groupId)
         {
             try
             {
                 //await Clients.User(userId: userId).RecieveScore(playerScore);
-                var otherInGroup = GroupUsers[groupName].Where(x => x != Context.UserIdentifier);
+                var otherInGroup = GroupUsers[groupId].Where(x => x != Context.UserIdentifier);
 
                 await Clients.Users(otherInGroup).RecieveScore(playerScore);
                 //await Clients.OthersInGroup(groupName).RecieveScore(playerScore);
@@ -41,6 +41,13 @@ namespace MovieManiaSignalr
         {
             await Clients.Group(groupName).ReceiveMessage(playerScore);
         }*/
+
+        public async Task OnGameFinished(string groupId)
+        {
+            var otherInGroup = GroupUsers[groupId].Where(x => x != Context.UserIdentifier);
+
+            await Clients.Users(otherInGroup).GameOverNotification();
+        }
 
         public async Task CreateGroupAsync(string opponentId, string topicId, string groupId)
         {
@@ -173,5 +180,6 @@ namespace MovieManiaSignalr
         Task RecieveScore(int score);
         Task ReceiveConnection();
         Task RecieveNotification();
+        Task GameOverNotification();
     }
 }
