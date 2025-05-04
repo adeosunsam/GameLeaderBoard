@@ -1,8 +1,8 @@
-﻿using Domain.Entity.MovieMania;
+﻿using System.Security.Claims;
+using Domain.Entity.MovieMania;
 using GameLeaderBoard.Context;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace MovieManiaSignalr
 {
@@ -71,13 +71,13 @@ namespace MovieManiaSignalr
                     GroupId = groupId
                 });
                 await _context.SaveChangesAsync();
+
+                await Clients.Caller.ReceiveMessage("Group created successfully.");
             }
             catch (Exception ex)
             {
                 await Clients.Caller.ReceiveMessage(ex.Message);
             }
-
-            await Clients.Caller.ReceiveMessage("Group created successfully.");
 
             //await Clients.User(opponentId).RecieveNotification();
             await Clients.User(opponentId).RecieveNotification();
@@ -96,6 +96,7 @@ namespace MovieManiaSignalr
                 await Clients.All.ReceiveMessage("Unable to join at the moment.");
                 return;
             }
+
             var usersInGroup = GroupUsers[activity.GroupId];
 
             if (usersInGroup.Count >= 2)
@@ -113,23 +114,62 @@ namespace MovieManiaSignalr
 
             activity.IsDeleted = true;
 
-            await _context.SaveChangesAsync();
-
-            /*if (usersInGroup.Add(Context.UserIdentifier))
+            try
             {
-                try
+                var userGameNumber = await (from u in _context.UserGamingNumbers
+                                            where (u.UserId == activity.ChallengerId || u.UserId == activity.UserId)
+                                            && !u.IsDeleted
+                                            select u).ToListAsync();
+
+                if (userGameNumber != null && userGameNumber.Any())
                 {
-                    await Groups.AddToGroupAsync(Context.UserIdentifier, groupName);
+                    foreach (var user in userGameNumber)
+                    {
+                        user.TotalGamePlayed += 1;
+                    }
+
+                    if (userGameNumber.Count == 1)
+                    {
+                        if (userGameNumber.First().UserId == activity.ChallengerId)
+                        {
+                            await _context.UserGamingNumbers.AddAsync(new UserGamingNumber
+                            {
+                                UserId = activity.UserId,
+                                TotalGamePlayed = 1
+                            });
+                        }
+                        else
+                        {
+                            await _context.UserGamingNumbers.AddAsync(new UserGamingNumber
+                            {
+                                UserId = activity.ChallengerId,
+                                TotalGamePlayed = 1
+                            });
+                        }
+                    }
                 }
-                catch(Exception ex)
+                else
                 {
-                    Console.WriteLine(ex.Message);
+                    await _context.UserGamingNumbers.AddRangeAsync(new List<UserGamingNumber>
+                    {
+                        new()
+                        {
+                            UserId = activity.ChallengerId,
+                            TotalGamePlayed = 1
+                        },
+                        new()
+                        {
+                            UserId = activity.UserId,
+                            TotalGamePlayed = 1
+                        }
+                    });
                 }
             }
-            if (usersInGroup.Count > 1)
+            finally
             {
-            await Clients.Users(usersInGroup).ReceiveConnection();
-            }*/
+                await _context.SaveChangesAsync();
+            }
+
         }
 
         public async Task LeaveGroup(string groupName)

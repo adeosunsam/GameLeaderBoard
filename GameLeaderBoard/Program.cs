@@ -2,6 +2,7 @@ using GameLeaderBoard.Extension;
 using Infrastructure.Service.Implementation;
 using Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MovieManiaSignalr;
 using Serilog;
 using Serilog.Events;
@@ -49,6 +50,9 @@ namespace GameLeaderBoard
             //builder.Services.AddScoped<ICacheDistribution, CacheDistribution>();
             builder.Services.AddScoped<MovieManiaService>();
 
+            builder.Services.AddHealthChecks()
+                .AddCheck("API Health", () => HealthCheckResult.Healthy("API is running"));
+
             builder.Services.AddAuthenticationConfig(configuration, builder.Environment);
 
             builder.Services.AddHttpClient();
@@ -66,6 +70,8 @@ namespace GameLeaderBoard
 
             var app = builder.Build();
 
+            app.UseHttpsRedirection();
+
             app.UseSwagger();
             app.UseSwaggerUI();
 
@@ -77,6 +83,8 @@ namespace GameLeaderBoard
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.MapHealthChecks("/health");
 
             app.Logger.LogInformation("Starting the app...");
             app.Run();

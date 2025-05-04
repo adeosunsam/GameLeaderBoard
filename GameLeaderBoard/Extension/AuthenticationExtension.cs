@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Infrastructure.DTOs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -44,7 +45,7 @@ namespace GameLeaderBoard.Extension
 
         public static void GetEnvironmentVariable(IWebHostEnvironment env, IConfiguration configuration)
         {
-            if (env.IsProduction())
+            if (!env.IsDevelopment())
             {
                 TokenData = new TokenValidation
                 {
@@ -60,13 +61,6 @@ namespace GameLeaderBoard.Extension
                 Issuer = configuration["JwtSettings:ValidIssuer"],
                 SecretKey = configuration["JwtSettings:SecretKey"]
             };
-        }
-
-        public struct TokenValidation
-        {
-            public string Audience { get; set; }
-            public string Issuer { get; set; }
-            public string SecretKey { get; set; }
         }
     }
 }

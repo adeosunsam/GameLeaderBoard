@@ -20,16 +20,24 @@ namespace Infrastructure.Service.Implementation
 
         public async Task<Result<string>> SubmitScore(SubmitScoreDto request)
         {
-            string? playerId = null;
-            if (request.PlayerId == null && request.PlayerName == null)
+            string? playerId = request.PlayerId;
+            if (string.IsNullOrWhiteSpace(request.PlayerId) && string.IsNullOrWhiteSpace(request.PlayerName))
             {
                 _logger.LogError("----------------PLAYERID OR PLAYERNAME IS NULL: unable to submit score at the moment----------------");
                 return Result<string>.Fail("unable to submit score at the moment", "400");
             }
 
             //submit score for new player
-            if (request.PlayerId == null)
+            if (string.IsNullOrWhiteSpace(request.PlayerId))
             {
+                var existingName = await _context.RampageArenaLeaderBoards.FirstOrDefaultAsync(x => x.PlayerName.ToLower() == request.PlayerName.ToLower());
+
+                if (existingName != null)
+                {
+                    _logger.LogError("----------------EXISTING LEADERBOARD FOUND:Name already exist in the satabase----------------");
+                    return Result<string>.Fail("Name already taken", "404");
+                }
+
                 var leaderboard = new RampageArenaLeaderBoard
                 {
                     PlayerName = request.PlayerName,
@@ -42,25 +50,38 @@ namespace Infrastructure.Service.Implementation
                 playerId = leaderboard.Id;
             }
 
-            //update existing player score
-            if (request.PlayerName == null)
-            {
-                var leaderboard = await _context.RampageArenaLeaderBoards.FirstOrDefaultAsync(x => x.Id == request.PlayerId);
-                if (leaderboard == null)
-                {
-                    _logger.LogError("----------------LEADERBOARD NOT FOUND:Invalid player id provided----------------");
-                    return Result<string>.Fail("Invalid player id provided", "404");
-                }
-                playerId = leaderboard.Id;
+            ////update existing player score
+            //if (!string.IsNullOrWhiteSpace(request.PlayerId))
+            //{
+            //    var leaderboard = await _context.RampageArenaLeaderBoards.FirstOrDefaultAsync(x => x.Id == request.PlayerId);
+            //    if (leaderboard == null)
+            //    {
+            //        _logger.LogError("----------------LEADERBOARD NOT FOUND:Invalid player id provided----------------");
+            //        return Result<string>.Fail("Invalid player id provided", "404");
+            //    }
+            //    playerId = leaderboard.Id;
 
-                leaderboard.PlayerScore = request.Score;
-            }
+            //    leaderboard.PlayerScore = request.Score;
+            //}
 
             //update rank
             {
-                var leaderboards = await _context.RampageArenaLeaderBoards
-                    .OrderBy(x => x.CreatedOn)
-                    .OrderByDescending(x => x.PlayerScore).ToListAsync();
+                var leaderboards = await (from l in _context.RampageArenaLeaderBoards
+                                   select l).ToListAsync();
+
+                if (!string.IsNullOrWhiteSpace(request.PlayerId))
+                {
+                    var player = leaderboards.FirstOrDefault(x => x.Id == request.PlayerId);
+
+                    if (player == null)
+                    {
+                        _logger.LogError("----------------LEADERBOARD NOT FOUND:Invalid player id provided----------------");
+                        return Result<string>.Fail("Invalid player id provided", "404");
+                    }
+                    player.PlayerScore = request.Score;
+                }
+
+                leaderboards = leaderboards.OrderByDescending(x => x.PlayerScore).ToList();
 
                 for (int i = 0; i < leaderboards.Count; i++)
                 {
@@ -84,30 +105,33 @@ namespace Infrastructure.Service.Implementation
         {
             var leaderboards = await _context.RampageArenaLeaderBoards
                     .OrderBy(x => x.CreatedOn)
-                    .OrderByDescending(x => x.PlayerScore).Take(10).ToListAsync();
+                    .OrderByDescending(x => x.PlayerScore)
+                    .ThenByDescending(x => x.ModifiedOn).Take(10).ToListAsync();
 
             if (playerId != null && !leaderboards.Exists(x => x.Id == playerId))
             {
-                leaderboards.Remove(leaderboards[^1]);
-
                 var playerScore = await _context.RampageArenaLeaderBoards.FirstOrDefaultAsync(x => x.Id == playerId);
 
                 if (playerScore == null)
                 {
                     _logger.LogError("----------------PLAYER LEADERBOARD:player leaderboard not found----------------");
                 }
-                else
+                else if(playerScore.PlayerScore > 0)
                 {
+                    leaderboards.Remove(leaderboards[^1]);
+
                     leaderboards.Add(playerScore);
                 }
             }
 
             var result = leaderboards.Select(x => new GetScoreDto
             {
+                PlayerId = x.Id,
                 Rank = x.Rank,
                 PlayerName = x.PlayerName,
-                Score = x.PlayerScore
-            }).ToList();
+                Score = x.PlayerScore,
+                ModifiedDate = x.ModifiedOn
+            }).OrderBy(y => y.Rank).ThenBy(z => z.ModifiedDate).ToList();
 
             return Result<List<GetScoreDto>>.Success("Leaderboard fetched successfully", data: result);
 

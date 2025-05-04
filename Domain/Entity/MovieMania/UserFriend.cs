@@ -5,10 +5,7 @@ namespace Domain.Entity.MovieMania
 {
     public class UserFriend : BaseEntity
     {
-        [ForeignKey("AppUser")]
-        public string AppUserId { get; set; }
-
-        public virtual AppUser AppUser { get; set; }
+        public string UserId { get; set; }
 
         [Required]
         public string FriendId { get; set; }

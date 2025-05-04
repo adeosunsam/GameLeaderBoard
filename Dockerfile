@@ -1,27 +1,32 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
+# This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+
+# This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY *.sln .
-
 COPY ["GameLeaderBoard/GameLeaderBoard.csproj", "GameLeaderBoard/"]
-RUN dotnet restore "GameLeaderBoard/GameLeaderBoard.csproj"
+COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+COPY ["MovieManiaSignalr/MovieManiaSignalr.csproj", "MovieManiaSignalr/"]
+RUN dotnet restore "./GameLeaderBoard/GameLeaderBoard.csproj"
 COPY . .
+WORKDIR "/src/GameLeaderBoard"
+RUN dotnet build "./GameLeaderBoard.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-WORKDIR /src/GameLeaderBoard
-RUN dotnet build
-
+# This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
-WORKDIR /src/GameLeaderBoard
-RUN dotnet publish -c Release -o /app/publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./GameLeaderBoard.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
 ENTRYPOINT ["dotnet", "GameLeaderBoard.dll"]

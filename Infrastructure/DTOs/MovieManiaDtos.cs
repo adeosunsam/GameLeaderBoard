@@ -23,6 +23,7 @@ namespace Infrastructure.DTOs
         {
             public string Id { get; set; }
             public string ChallengerName { get; set; }
+            public string ChallengerId { get; set; }
             public string? UserImage { get; set; }
             public ActivityEnum Activity { get; set; }
             public string? TopicName { get; set; }
@@ -61,7 +62,7 @@ namespace Infrastructure.DTOs
             public int TotalFriends { get; set; }
         }
 
-        public class UserDetailRequestDto
+        public class UserDetailDto
         {
             public string UserId { get; set; }
             public string FirstName { get; set; }

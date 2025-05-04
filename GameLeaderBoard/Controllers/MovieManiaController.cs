@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MovieManiaSignalr;
 using static Infrastructure.DTOs.MovieManiaDtos;
@@ -18,13 +19,13 @@ namespace GameLeaderBoard.Controllers
             _httpClient = httpClient;
             _movieService = maniaService;
         }
-
+/*
         [HttpPost("tazama-webbhook")]
         public IActionResult GenerateMessagePair([FromBody]string messageObject)
         {
             return Ok(messageObject);
         }
-
+*/
         [HttpGet]
         [Route("pending-challenge")]
         public IActionResult FetchChallengedData(string playerId)
@@ -51,6 +52,14 @@ namespace GameLeaderBoard.Controllers
         }
 
         [HttpPost]
+        [Route("follow-topic/{topicId}/{userId}")]
+        public async Task<IActionResult> FollowTopic(string topicId, string userId)
+        {
+            var result = await _movieService.FollowTopic(userId, topicId);
+            return Ok(result);
+        }
+
+        [HttpPost]
         [Route("submit-score")]
         public async Task<IActionResult> DeleteCompletedChallenge([FromBody] List<SaveScoreForLeaderBoardDto> request)
         {
@@ -72,6 +81,22 @@ namespace GameLeaderBoard.Controllers
         {
             var userGamingCount = await _movieService.FetchUserGamingCount(userId);
             return Ok(userGamingCount);
+        }
+
+        [HttpGet]
+        [Route("user/{userId}")]
+        public async Task<IActionResult> GetUser(string userId)
+        {
+            var userDetail = await _movieService.GetUserById(userId);
+            return Ok(userDetail);
+        }
+
+        [HttpGet]
+        [Route("user/{userId}/list")]
+        public async Task<IActionResult> SearchUser(string userId, [Required][FromQuery] string searchParam)
+        {
+            var userDetail = await _movieService.Search(userId, searchParam);
+            return Ok(userDetail);
         }
 
         [HttpGet]
@@ -100,7 +125,7 @@ namespace GameLeaderBoard.Controllers
 
         [HttpPost]
         [Route("create-user")]
-        public async Task<IActionResult> Login(UserDetailRequestDto request)
+        public async Task<IActionResult> Login(UserDetailDto request)
         {
             await _movieService.Login(request);
             return Ok();
@@ -112,6 +137,13 @@ namespace GameLeaderBoard.Controllers
         {
             var token = _movieService.Login(userId);
             return Ok(new { token });
+        }
+
+        [HttpGet]
+        [Route("~/ping")]
+        public IActionResult Ping()
+        {
+            return Ok();
         }
     }
 }
