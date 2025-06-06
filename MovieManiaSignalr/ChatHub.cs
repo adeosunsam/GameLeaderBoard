@@ -37,10 +37,17 @@ namespace MovieManiaSignalr
             }
         }
 
-        /*public async Task SendMessageToGroup(string groupName, int playerScore)
+        public async Task SendActivitiesAsync(string opponentId)
         {
-            await Clients.Group(groupName).ReceiveMessage(playerScore);
-        }*/
+            try
+            {
+                await Clients.User(opponentId).RecieveNotification();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
 
         public async Task OnGameFinished(string groupId)
         {
@@ -64,7 +71,7 @@ namespace MovieManiaSignalr
             {
                 await _context.UserActivities.AddAsync(new UserActivity
                 {
-                    ChallengerId = Context.UserIdentifier,
+                    SenderId = Context.UserIdentifier,
                     UserId = opponentId,
                     TopicId = topicId,
                     ActivityAction = ActivityEnum.Challenge,
@@ -117,7 +124,7 @@ namespace MovieManiaSignalr
             try
             {
                 var userGameNumber = await (from u in _context.UserGamingNumbers
-                                            where (u.UserId == activity.ChallengerId || u.UserId == activity.UserId)
+                                            where (u.UserId == activity.SenderId || u.UserId == activity.UserId)
                                             && !u.IsDeleted
                                             select u).ToListAsync();
 
@@ -130,7 +137,7 @@ namespace MovieManiaSignalr
 
                     if (userGameNumber.Count == 1)
                     {
-                        if (userGameNumber.First().UserId == activity.ChallengerId)
+                        if (userGameNumber.First().UserId == activity.SenderId)
                         {
                             await _context.UserGamingNumbers.AddAsync(new UserGamingNumber
                             {
@@ -142,7 +149,7 @@ namespace MovieManiaSignalr
                         {
                             await _context.UserGamingNumbers.AddAsync(new UserGamingNumber
                             {
-                                UserId = activity.ChallengerId,
+                                UserId = activity.SenderId,
                                 TotalGamePlayed = 1
                             });
                         }
@@ -154,7 +161,7 @@ namespace MovieManiaSignalr
                     {
                         new()
                         {
-                            UserId = activity.ChallengerId,
+                            UserId = activity.SenderId,
                             TotalGamePlayed = 1
                         },
                         new()

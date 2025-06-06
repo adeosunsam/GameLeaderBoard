@@ -44,6 +44,22 @@ namespace GameLeaderBoard.Controllers
         }
 
         [HttpPost]
+        [Route("follow-user")]
+        public async Task<IActionResult> FollowUserRequest([FromBody] UserFollowRequest request)
+        {
+            var activities = await _movieService.RequestToFollowUser(request);
+            return Ok(activities);
+        }
+
+        [HttpPost]
+        [Route("manage-request")]
+        public async Task<IActionResult> ManageFriendRequest([FromBody] ManageFriendRequest request)
+        {
+            var activities = await _movieService.ManageFriendRequest(request);
+            return Ok(activities);
+        }
+
+        [HttpPost]
         [Route("save-challenge")]
         public IActionResult SaveChallengedData([FromBody] UserChallengeData request)
         {

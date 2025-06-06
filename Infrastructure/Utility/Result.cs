@@ -21,7 +21,7 @@ namespace Infrastructure.Utility
         public Result()
         {
         }
-        public static Result<T> Fail(string responseMessage, string responseCode)
+        public static Result<T> Fail(string responseMessage, string responseCode = "400")
         {
             return new Result<T> { ResponseMessage = responseMessage, ResponseCode = responseCode };
         }

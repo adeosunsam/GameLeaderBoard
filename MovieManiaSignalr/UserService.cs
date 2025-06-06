@@ -38,6 +38,113 @@ namespace MovieManiaSignalr
             return Result<ICollection<UserDetailResponseDto>>.Success("friends retrieved successfully", data: friends);
         }
 
+        public async Task<Result<bool>> RequestToFollowUser(UserFollowRequest request)
+        {
+            var userActivity = await (from activity in _context.UserActivities
+                                      where activity.SenderId == request.UserId
+                                      && activity.UserId == request.FriendId
+                                      && activity.ActivityAction == ActivityEnum.Follow
+                                      join f in _context.UserFriends.Where(x => x.UserId == request.UserId && !x.IsDeleted) on activity.UserId equals f.FriendId into friends
+                                      from f in friends.DefaultIfEmpty()
+                                      select new
+                                      {
+                                          UserFriend = f,
+                                          Activity = activity
+                                      }).FirstOrDefaultAsync();
+
+            if (userActivity != null && userActivity.UserFriend != null)
+            {
+                return Result<bool>.Success($"{userActivity.UserFriend.FriendId} is already a friend.", data: true);
+            }
+
+            if (userActivity != null && userActivity.Activity != null && !userActivity.Activity.IsDeleted)
+            {
+                return Result<bool>.Fail("friend request already sent", "400");
+            }
+
+            //add new user activities record
+
+            var userActivityRecord = new UserActivity
+            {
+                UserId = request.FriendId,
+                SenderId = request.UserId,
+                ActivityAction = ActivityEnum.Follow
+            };
+
+            await _context.UserActivities.AddAsync(userActivityRecord);
+
+            await _context.SaveChangesAsync();
+
+            return Result<bool>.Success("request sent successfully", data: true);
+        }
+
+        public async Task<Result<bool>> ManageFriendRequest(ManageFriendRequest request)
+        {
+            var userActivity = await (from activity in _context.UserActivities
+                                      where activity.SenderId == request.UserId
+                                      && activity.UserId == request.FriendId
+                                      && activity.ActivityAction == ActivityEnum.Follow
+                                      && !activity.IsDeleted
+                                      join f in _context.UserFriends.Where(x => x.UserId == request.UserId && !x.IsDeleted) on activity.UserId equals f.FriendId into friends
+                                      from f in friends.DefaultIfEmpty()
+                                      select new
+                                      {
+                                          UserFriend = f,
+                                          Activity = activity
+                                      }).FirstOrDefaultAsync();
+
+            if (userActivity == null)
+            {
+                return Result<bool>.Fail($"Invalid activity request");
+            }
+
+            if(userActivity.Activity != null && request.Action == ManageFriend.Decline)
+            {
+                userActivity.Activity.IsDeleted = true;
+                await _context.SaveChangesAsync();
+
+                return Result<bool>.Success("request declined successfully", data: true);
+            }
+
+            if (userActivity.Activity != null && userActivity.UserFriend != null)
+            {
+                //user has been previously accepted.
+                userActivity.Activity.IsDeleted = true;
+                await _context.SaveChangesAsync();
+
+                return Result<bool>.Fail("request has been previously accepted.");
+            }
+
+            await _context.UserFriends.AddRangeAsync(new List<UserFriend>
+            {
+                new()
+                {
+                    UserId = request.UserId,
+                    FriendId = request.FriendId
+                },
+                new()
+                {
+                    UserId = request.FriendId,
+                    FriendId = request.UserId
+                }
+            });
+
+            var data = await _context.UserActivities.Where(x => (x.UserId == request.UserId && x.SenderId == request.FriendId) 
+            || (x.UserId == request.FriendId && x.SenderId == request.UserId)).ToListAsync();
+
+            if (data != null && data.Any())
+            {
+                foreach (var activity in data)
+                {
+                    activity.IsDeleted = true;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Result<bool>.Success("request accepted successfully", data: true);
+        }
+
         public async Task<Result<UserGamingCountDto>> FetchUserGamingCount(string userId)
         {
             var gameCount = await (from user in _context.AppUsers

@@ -71,20 +71,20 @@ namespace MovieManiaSignalr
             var userActivity = await (from activity in _context.UserActivities
                                       where activity.UserId == userId
                                       && !activity.IsDeleted
-                                      join user in _context.AppUsers on activity.ChallengerId equals user.UserId
+                                      join user in _context.AppUsers on activity.SenderId equals user.UserId
                                       where !user.IsDeleted
                                       join topic in _context.Topics on activity.TopicId equals topic.Id into t
                                       from topic in t.DefaultIfEmpty()
                                       select new UserActivityResponse
                                       {
                                           Id = activity.Id,
-                                          TopicId = topic.Id,
-                                          ChallengerName = $"{user.LastName} {user.FirstName}",
+                                          TopicId = topic == null ? null : topic.Id,
+                                          SenderName = $"{user.LastName} {user.FirstName}",
                                           UserImage = user.Image,
                                           Activity = activity.ActivityAction,
-                                          TopicName = topic.Name,
+                                          TopicName = topic == null ? null : topic.Name,
                                           GroupId = activity.GroupId,
-                                          ChallengerId = activity.ChallengerId,
+                                          SenderId = activity.SenderId,
                                       }).ToListAsync() ?? new List<UserActivityResponse>();
 
             return Result<ICollection<UserActivityResponse>>.Success("All user activities retrieved successfully", data: userActivity);
@@ -125,5 +125,7 @@ namespace MovieManiaSignalr
 
             await _context.SaveChangesAsync();
         }
+
+
     }
 }

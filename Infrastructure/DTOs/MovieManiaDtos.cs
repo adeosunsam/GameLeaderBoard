@@ -1,4 +1,5 @@
-﻿using Domain.Entity.MovieMania;
+﻿using System.ComponentModel.DataAnnotations;
+using Domain.Entity.MovieMania;
 
 namespace Infrastructure.DTOs
 {
@@ -19,11 +20,29 @@ namespace Infrastructure.DTOs
             public int Score { get; set; }
         }
 
+        public class UserFollowRequest
+        {
+            [Required]
+            public string UserId { get; set; }
+            [Required]
+            public string FriendId { get; set; }
+        }
+
+        public class ManageFriendRequest
+        {
+            [Required]
+            public string UserId { get; set; }
+            [Required]
+            public string FriendId { get; set; }
+            [Required]
+            public ManageFriend Action { get; set; }
+        }
+
         public class UserActivityResponse
         {
             public string Id { get; set; }
-            public string ChallengerName { get; set; }
-            public string ChallengerId { get; set; }
+            public string SenderName { get; set; }
+            public string SenderId { get; set; }
             public string? UserImage { get; set; }
             public ActivityEnum Activity { get; set; }
             public string? TopicName { get; set; }
