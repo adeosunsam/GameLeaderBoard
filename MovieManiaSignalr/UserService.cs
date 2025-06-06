@@ -81,11 +81,11 @@ namespace MovieManiaSignalr
         public async Task<Result<bool>> ManageFriendRequest(ManageFriendRequest request)
         {
             var userActivity = await (from activity in _context.UserActivities
-                                      where activity.SenderId == request.UserId
-                                      && activity.UserId == request.FriendId
+                                      where activity.UserId == request.UserId
+                                      && activity.SenderId == request.FriendId
                                       && activity.ActivityAction == ActivityEnum.Follow
                                       && !activity.IsDeleted
-                                      join f in _context.UserFriends.Where(x => x.UserId == request.UserId && !x.IsDeleted) on activity.UserId equals f.FriendId into friends
+                                      join f in _context.UserFriends.Where(x => x.UserId == request.UserId && !x.IsDeleted) on activity.SenderId equals f.FriendId into friends
                                       from f in friends.DefaultIfEmpty()
                                       select new
                                       {
